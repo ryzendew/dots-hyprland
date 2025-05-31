@@ -80,8 +80,8 @@ Scope {
                 }
             }
 
-            implicitWidth: columnLayout.width
-            implicitHeight: columnLayout.height
+            implicitWidth: columnLayout.implicitWidth
+            implicitHeight: columnLayout.implicitHeight
 
             function setSearchingText(text) {
                 searchWidget.setSearchingText(text);
@@ -90,7 +90,11 @@ Scope {
             ColumnLayout {
                 id: columnLayout
                 visible: GlobalStates.overviewOpen
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors {
+                    horizontalCenter: parent.horizontalCenter
+                    top: !ConfigOptions.bar.bottom ? parent.top : null
+                    bottom: ConfigOptions.bar.bottom ? parent.bottom : null
+                }
 
                 Keys.onPressed: (event) => {
                     if (event.key === Qt.Key_Escape) {
@@ -192,7 +196,6 @@ Scope {
                 GlobalStates.overviewOpen = false;
                 return;
             }
-            Cliphist.refresh()
             for (let i = 0; i < overviewVariants.instances.length; i++) {
                 let panelWindow = overviewVariants.instances[i];
                 if (panelWindow.modelData.name == Hyprland.focusedMonitor.name) {

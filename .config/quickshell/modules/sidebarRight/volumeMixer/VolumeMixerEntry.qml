@@ -1,7 +1,6 @@
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 import "root:/services"
-import "root:/modules/common/functions/icons.js" as Icons
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
@@ -48,7 +47,10 @@ Item {
                     sourceSize.width: size
                     sourceSize.height: size
                     source: {
-                        const icon = Icons.noKnowledgeIconGuess(root.node.properties["application.icon-name"]);
+                        let icon;
+                        icon = AppSearch.guessIcon(root.node.properties["application.icon-name"]);
+                        if (AppSearch.iconExists(icon)) return Quickshell.iconPath(icon, "image-missing");
+                        icon = AppSearch.guessIcon(root.node.properties["node.name"]);
                         return Quickshell.iconPath(icon, "image-missing");
                     }
                 }

@@ -13,19 +13,25 @@ Singleton {
     }
 
     property QtObject apps: QtObject {
-        property string bluetooth: "blueberry"
+        property string bluetooth: "better-control --bluetooth"
         property string imageViewer: "loupe"
         property string network: "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center wifi"
         property string settings: "XDG_CURRENT_DESKTOP=\"gnome\" gnome-control-center"
         property string taskManager: "gnome-usage"
-        property string terminal: "foot" // This is only for shell actions
+        property string terminal: "kitty -1" // This is only for shell actions
+    }
+
+    property QtObject battery: QtObject {
+        property int low: 20
+        property int critical: 5
+        property int suspend: 2
     }
 
     property QtObject bar: QtObject {
-        property int batteryLowThreshold: 20
+        property bool bottom: false // Instead of top
+        property bool borderless: true
         property string topLeftIcon: "spark" // Options: distro, spark
         property bool showBackground: true
-        property bool borderless: false
         property QtObject resources: QtObject {
             property bool alwaysShowSwap: true
             property bool alwaysShowCpu: false
@@ -38,9 +44,13 @@ Singleton {
     }
 
     property QtObject dock: QtObject {
+        property bool enable: false
         property real height: 60
         property real hoverRegionHeight: 3
         property bool pinnedOnStartup: false
+        property list<string> pinnedApps: [ // IDs of pinned entries
+            "org.kde.dolphin",
+        ]
     }
 
     property QtObject networking: QtObject {
@@ -49,6 +59,11 @@ Singleton {
 
     property QtObject osd: QtObject {
         property int timeout: 1000
+    }
+
+    property QtObject osk: QtObject {
+        property string layout: "qwerty_full"
+        property bool pinnedOnStartup: false
     }
 
     property QtObject overview: QtObject {

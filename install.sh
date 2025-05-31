@@ -100,11 +100,10 @@ install-local-pkgbuild() {
 }
 
 # Install core dependencies from the meta-packages
-metapkgs=(./arch-packages/illogical-impulse-{audio,python,backlight,basic,fonts-themes,gnome,gtk,portal,screencapture,widgets})
-metapkgs+=(./arch-packages/illogical-impulse-agsv1)
+metapkgs=(./arch-packages/illogical-impulse-{audio,backlight,basic,fonts-themes,kde,portal,python,screencapture,toolkit,widgets})
 metapkgs+=(./arch-packages/illogical-impulse-hyprland)
 metapkgs+=(./arch-packages/illogical-impulse-microtex-git)
-metapkgs+=(./arch-packages/illogical-impulse-oneui4-icons-git)
+# metapkgs+=(./arch-packages/illogical-impulse-oneui4-icons-git)
 [[ -f /usr/share/icons/Bibata-Modern-Classic/index.theme ]] || \
   metapkgs+=(./arch-packages/illogical-impulse-bibata-modern-classic-bin)
 

@@ -41,7 +41,8 @@ Rectangle {
     property real scale: {
         return Math.min(
             root.maxWidth / imageWidth,
-            root.maxHeight / imageHeight
+            root.maxHeight / imageHeight,
+            1
         )
     }
 
@@ -67,6 +68,10 @@ Rectangle {
                 root.source = ""
             }
         }
+    }
+
+    Component.onDestruction: {
+        Hyprland.dispatch(`exec bash -c "[ -f '${imageDecodeFilePath}' ] && rm -f '${imageDecodeFilePath}'"`)
     }
 
     Image {

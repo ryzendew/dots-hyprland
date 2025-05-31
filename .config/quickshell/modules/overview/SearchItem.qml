@@ -27,7 +27,7 @@ RippleButton {
     property string materialSymbol: entry?.materialSymbol ?? ""
     property string cliphistRawString: entry?.cliphistRawString ?? ""
 
-    property string highlightPrefix: `<u><font color="${Appearance.m3colors.m3primary}">`
+    property string highlightPrefix: `<u><font color="${Appearance.colors.colPrimary}">`
     property string highlightSuffix: `</font></u>`
     function highlightContent(content, query) {
         if (!query || query.length === 0 || content == query || fontType === "monospace")
@@ -155,7 +155,24 @@ RippleButton {
                 text: root.itemType
             }
             RowLayout {
-                Repeater {
+                Loader { // Checkmark for copied clipboard entry
+                    visible: itemName == Quickshell.clipboardText && root.cliphistRawString
+                    active: itemName == Quickshell.clipboardText && root.cliphistRawString
+                    sourceComponent: Rectangle {
+                        implicitWidth: activeText.implicitHeight
+                        implicitHeight: activeText.implicitHeight
+                        radius: Appearance.rounding.full
+                        color: Appearance.colors.colPrimary
+                        MaterialSymbol {
+                            id: activeText
+                            anchors.centerIn: parent
+                            text: "check"
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.m3colors.m3onPrimary
+                        }
+                    }
+                }
+                Repeater { // Favicons for links
                     model: root.query == root.itemName ? [] : root.urls
                     Favicon {
                         required property var modelData
@@ -163,7 +180,7 @@ RippleButton {
                         url: modelData
                     }
                 }
-                StyledText {
+                StyledText { // Item name/content
                     Layout.fillWidth: true
                     id: nameText
                     textFormat: Text.StyledText // RichText also works, but StyledText ensures elide work
@@ -175,7 +192,7 @@ RippleButton {
                     text: `${root.displayContent}`
                 }
             }
-            Loader {
+            Loader { // Clipboard image preview
                 active: root.cliphistRawString && /^\d+\t\[\[.*binary data.*\d+x\d+.*\]\]$/.test(root.cliphistRawString)
                 sourceComponent: CliphistImage {
                     Layout.fillWidth: true

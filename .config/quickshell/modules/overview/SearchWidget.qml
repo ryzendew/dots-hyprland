@@ -23,11 +23,6 @@ Item { // Wrapper
     implicitHeight: searchWidgetContent.implicitHeight + Appearance.sizes.elevationMargin * 2
 
     property string mathResult: ""
-    property bool lastQueryWasClipboard: false
-
-    onShowResultsChanged: {
-        lastQueryWasClipboard = false;
-    }
 
     function disableExpandAnimation() {
         searchWidthBehavior.enabled = false;
@@ -48,27 +43,27 @@ Item { // Wrapper
         {
             action: "img", 
             execute: () => {
-                executor.executeCommand(`${xdgConfigHome}/quickshell/scripts/switchwall.sh`.replace(/file:\/\//, ""))
+                executor.executeCommand(Directories.wallpaperSwitchScriptPath)
             }
         },
         {
             action: "dark",
             execute: () => {
-                executor.executeCommand(`${xdgConfigHome}/quickshell/scripts/switchwall.sh --mode dark --noswitch`.replace(/file:\/\//, ""))
+                executor.executeCommand(`${Directories.wallpaperSwitchScriptPath} --mode dark --noswitch`)
             }
         },
         {
             action: "light",
             execute: () => {
-                executor.executeCommand(`${xdgConfigHome}/quickshell/scripts/switchwall.sh --mode light --noswitch`.replace(/file:\/\//, ""))
+                executor.executeCommand(`${Directories.wallpaperSwitchScriptPath} --mode light --noswitch`)
             }
         },
         {
             action: "accentcolor",
             execute: (args) => {
                 executor.executeCommand(
-                    `${xdgConfigHome}/quickshell/scripts/switchwall.sh --noswitch --color ${args != '' ? ("'"+args+"'") : ""}`
-                    .replace(/file:\/\//, ""))
+                    `${Directories.wallpaperSwitchScriptPath} --noswitch --color ${args != '' ? ("'"+args+"'") : ""}`
+                )
             }
         },
         {
@@ -174,12 +169,8 @@ Item { // Wrapper
         }
     }
 
-    RectangularShadow { // Background shadow
-        anchors.fill: searchWidgetContent
-        radius: searchWidgetContent.radius
-        blur: 1.2 * Appearance.sizes.elevationMargin
-        spread: 1
-        color: Appearance.colors.colShadow
+    StyledRectangularShadow {
+        target: searchWidgetContent
     }
     Rectangle { // Background
         id: searchWidgetContent
@@ -254,7 +245,7 @@ Item { // Wrapper
 
                     cursorDelegate: Rectangle {
                         width: 1
-                        color: searchInput.activeFocus ? Appearance.m3colors.m3primary : "transparent"
+                        color: searchInput.activeFocus ? Appearance.colors.colPrimary : "transparent"
                         radius: 1
                     }
                 }
@@ -277,6 +268,7 @@ Item { // Wrapper
                 bottomMargin: 10
                 spacing: 2
                 KeyNavigation.up: searchBar
+                highlightMoveDuration : 100
 
                 onFocusChanged: {
                     if(focus) appResults.currentIndex = 1;
@@ -298,10 +290,6 @@ Item { // Wrapper
 
                         ///////////// Special cases ///////////////
                         if (root.searchingText.startsWith(ConfigOptions.search.prefix.clipboard)) { // Clipboard
-                            if (!root.lastQueryWasClipboard) {
-                                root.lastQueryWasClipboard = true;
-                                Cliphist.refresh(); // Refresh clipboard entries
-                            }
                             const searchString = root.searchingText.slice(ConfigOptions.search.prefix.clipboard.length);
                             return Cliphist.fuzzyQuery(searchString).map(entry => {
                                 return {
@@ -311,7 +299,6 @@ Item { // Wrapper
                                     type: `#${entry.match(/^\s*(\S+)/)?.[1] || ""}`,
                                     execute: () => {
                                         Hyprland.dispatch(`exec echo '${StringUtils.shellSingleQuoteEscape(entry)}' | cliphist decode | wl-copy`);
-                                        Cliphist.refresh()
                                     }
                                 };
                             }).filter(Boolean);

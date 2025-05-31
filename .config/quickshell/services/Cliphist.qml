@@ -16,7 +16,7 @@ Singleton {
     property real scoreThreshold: 0.2
     property list<string> entries: []
     readonly property var preparedEntries: entries.map(a => ({
-        name: Fuzzy.prepare(`${a}`),
+        name: Fuzzy.prepare(`${a.replace(/^\s*\S+\s+/, "")}`),
         entry: a
     }))
     function fuzzyQuery(search: string): var {
@@ -41,6 +41,22 @@ Singleton {
     function refresh() {
         readProc.buffer = []
         readProc.running = true
+    }
+
+    Connections {
+        target: Quickshell
+        function onClipboardTextChanged() {
+            delayedUpdateTimer.restart()
+        }
+    }
+
+    Timer {
+        id: delayedUpdateTimer
+        interval: ConfigOptions.hacks.arbitraryRaceConditionDelay
+        repeat: false
+        onTriggered: {
+            root.refresh()
+        }
     }
 
     Process {

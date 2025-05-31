@@ -124,12 +124,8 @@ Button {
                 width: contextMenu.width
                 height: contextMenu.height
 
-                RectangularShadow { // Background shadow
-                    anchors.fill: contextMenu
-                    radius: contextMenu.radius
-                    blur: 1.2 * Appearance.sizes.elevationMargin
-                    spread: 1
-                    color: Appearance.colors.colShadow
+                StyledRectangularShadow {
+                    target: contextMenu
                 }
                 Rectangle {
                     id: contextMenu
@@ -184,7 +180,7 @@ Button {
                             buttonText: qsTr("Download")
                             onClicked: {
                                 root.showActions = false
-                                Hyprland.dispatch(`exec curl '${root.imageData.file_url}' -o '${root.imageData.is_nsfw ? root.nsfwPath : root.downloadPath}/${root.fileName}' && notify-send '${qsTr("Download complete")}' '${root.downloadPath}/${root.fileName}'`)
+                                Hyprland.dispatch(`exec curl '${root.imageData.file_url}' -o '${root.imageData.is_nsfw ? root.nsfwPath : root.downloadPath}/${root.fileName}' && notify-send '${qsTr("Download complete")}' '${root.downloadPath}/${root.fileName}' -a 'Shell'`)
                             }
                         }
                     }

@@ -23,7 +23,7 @@ Scope { // Scope
             id: dockRoot
             screen: modelData
             
-            property bool reveal: root.pinned || dockMouseArea.containsMouse
+            property bool reveal: root.pinned || dockMouseArea.containsMouse || dockApps.requestDockShow
 
             anchors {
                 bottom: true
@@ -35,9 +35,6 @@ Scope { // Scope
                 cheatsheetLoader.active = false
             }
             exclusiveZone: root.pinned ? implicitHeight - Appearance.sizes.hyprlandGapsOut : 0
-            Component.onCompleted: {
-                console.log(ConfigOptions.dock.hoverRegionHeight)
-            }
 
             implicitWidth: dockBackground.implicitWidth
             WlrLayershell.namespace: "quickshell:dock"
@@ -75,13 +72,8 @@ Scope { // Scope
                         implicitWidth: dockRow.implicitWidth + 5 * 2
                         height: parent.height - Appearance.sizes.elevationMargin - Appearance.sizes.hyprlandGapsOut
 
-                        RectangularShadow {
-                            anchors.fill: dockVisualBackground
-                            radius: dockVisualBackground.radius
-                            blur: 1.2 * Appearance.sizes.elevationMargin
-                            spread: 1
-                            color: Appearance.colors.colShadow
-                            cached: true
+                        StyledRectangularShadow {
+                            target: dockVisualBackground
                         }
                         Rectangle {
                             id: dockVisualBackground
@@ -119,7 +111,7 @@ Scope { // Scope
                                 }
                             }
                             DockSeparator {}
-                            DockApps {}
+                            DockApps { id: dockApps }
                             DockSeparator {}
                             DockButton {
                                 onClicked: Hyprland.dispatch("global quickshell:overviewToggle")

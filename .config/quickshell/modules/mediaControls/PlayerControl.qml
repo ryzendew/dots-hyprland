@@ -23,7 +23,7 @@ Item { // Player instance
     property string artDownloadLocation: Directories.coverArt
     property string artFileName: Qt.md5(artUrl) + ".jpg"
     property string artFilePath: `${artDownloadLocation}/${artFileName}`
-    property color artDominantColor: Appearance.m3colors.m3secondaryContainer
+    property color artDominantColor: colorQuantizer?.colors[0] || Appearance.m3colors.m3secondaryContainer
     property bool downloaded: false
 
     implicitWidth: widgetWidth
@@ -76,21 +76,15 @@ Item { // Player instance
         property string targetFile: playerController.artUrl
         command: [ "bash", "-c", `[ -f ${artFilePath} ] || curl -sSL '${targetFile}' -o '${artFilePath}'` ]
         onExited: (exitCode, exitStatus) => {
-            colorQuantizer.targetFile = playerController.artUrl // Yes this binding break is intentional
-            colorQuantizer.running = true
             playerController.downloaded = true
         }
     }
 
-    Process { // Average Color Runner
+    ColorQuantizer {
         id: colorQuantizer
-        property string targetFile: playerController.artUrl
-        command: [ "sh", "-c", `magick '${targetFile}' -scale 1x1\\! -format '%[fx:int(255*r+.5)],%[fx:int(255*g+.5)],%[fx:int(255*b+.5)]' info: | sed 's/,/\\n/g' | xargs -L 1 printf '%02x' ; echo` ]
-        stdout: SplitParser {
-            onRead: data => {
-                playerController.artDominantColor = "#" + data
-            }
-        }
+        source: playerController.downloaded ? Qt.resolvedUrl(artFilePath) : ""
+        depth: 0 // 2^0 = 1 color
+        rescaleSize: 1 // Rescale to 1x1 pixel for faster processing
     }
 
     property QtObject blendedColors: QtObject {
@@ -99,7 +93,7 @@ Item { // Player instance
         property color colOnLayer0: ColorUtils.mix(Appearance.colors.colOnLayer0, artDominantColor, 0.5)
         property color colOnLayer1: ColorUtils.mix(Appearance.colors.colOnLayer1, artDominantColor, 0.5)
         property color colSubtext: ColorUtils.mix(Appearance.colors.colOnLayer1, artDominantColor, 0.5)
-        property color colPrimary: ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.m3colors.m3primary, artDominantColor), artDominantColor, 0.5)
+        property color colPrimary: ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.colors.colPrimary, artDominantColor), artDominantColor, 0.5)
         property color colPrimaryHover: ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.colors.colPrimaryHover, artDominantColor), artDominantColor, 0.3)
         property color colPrimaryActive: ColorUtils.mix(ColorUtils.adaptToAccent(Appearance.colors.colPrimaryActive, artDominantColor), artDominantColor, 0.3)
         property color colSecondaryContainer: ColorUtils.mix(Appearance.m3colors.m3secondaryContainer, artDominantColor, 0.3)
@@ -110,13 +104,8 @@ Item { // Player instance
 
     }
 
-    RectangularShadow {
-        anchors.fill: background
-        radius: background.radius
-        blur: 1.2 * Appearance.sizes.elevationMargin
-        spread: 1
-        color: Appearance.colors.colShadow
-        cached: true
+    StyledRectangularShadow {
+        target: background
     }
     Rectangle { // Background
         id: background
@@ -137,7 +126,6 @@ Item { // Player instance
         Image {
             id: blurredArt
             anchors.fill: parent
-            visible: true
             source: playerController.downloaded ? Qt.resolvedUrl(artFilePath) : ""
             sourceSize.width: background.width
             sourceSize.height: background.height
@@ -149,7 +137,6 @@ Item { // Player instance
             layer.enabled: true
             layer.effect: MultiEffect {
                 source: blurredArt
-                anchors.fill: blurredArt
                 saturation: 0.2
                 blurEnabled: true
                 blurMax: 100

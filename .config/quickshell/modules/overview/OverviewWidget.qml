@@ -49,22 +49,19 @@ Item {
     property Component windowComponent: OverviewWindow {}
     property list<OverviewWindow> windowWidgets: []
 
-    RectangularShadow { // Background shadow
-        anchors.fill: overviewBackground
-        radius: overviewBackground.radius
-        blur: 1.2 * Appearance.sizes.elevationMargin
-        spread: 1
-        color: Appearance.colors.colShadow
+    StyledRectangularShadow {
+        target: overviewBackground
     }
     Rectangle { // Background
         id: overviewBackground
-        
+        property real padding: 10
         anchors.fill: parent
+        anchors.margins: Appearance.sizes.elevationMargin
 
-        implicitWidth: workspaceColumnLayout.implicitWidth + 5 * 2
-        implicitHeight: workspaceColumnLayout.implicitHeight + 5 * 2
+        implicitWidth: workspaceColumnLayout.implicitWidth + padding * 2
+        implicitHeight: workspaceColumnLayout.implicitHeight + padding * 2
+        radius: Appearance.rounding.screenRounding * root.scale + padding
         color: Appearance.colors.colLayer0
-        radius: Appearance.rounding.screenRounding * root.scale + 5 * 2
 
         ColumnLayout {
             id: workspaceColumnLayout
@@ -176,8 +173,8 @@ Item {
                         id: dragArea
                         anchors.fill: parent
                         hoverEnabled: true
-                        onEntered: hovered = true
-                        onExited: hovered = false
+                        onEntered: hovered = true // For hover color change
+                        onExited: hovered = false // For hover color change
                         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
                         drag.target: parent
                         onPressed: {
@@ -211,6 +208,12 @@ Item {
                                 Hyprland.dispatch(`closewindow address:${windowData.address}`)
                                 event.accepted = true
                             }
+                        }
+
+                        StyledToolTip {
+                            extraVisibleCondition: false
+                            alternativeVisibleCondition: dragArea.containsMouse && !window.Drag.active
+                            content: `${windowData.title}\n[${windowData.class}] ${windowData.xwayland ? "[XWayland] " : ""}\n`
                         }
                     }
                 }

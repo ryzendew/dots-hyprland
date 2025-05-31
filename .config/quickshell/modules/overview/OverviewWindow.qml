@@ -1,7 +1,6 @@
 import "root:/services/"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
-import "root:/modules/common/functions/icons.js" as Icons
 import "root:/modules/common/functions/color_utils.js" as ColorUtils
 import Qt5Compat.GraphicalEffects
 import QtQuick
@@ -13,7 +12,6 @@ import Quickshell.Hyprland
 
 Rectangle { // Window
     id: root
-
     property var windowData
     property var monitorData
     property var scale
@@ -33,8 +31,10 @@ Rectangle { // Window
     property var iconToWindowRatio: 0.35
     property var xwaylandIndicatorToIconRatio: 0.35
     property var iconToWindowRatioCompact: 0.6
-    property var iconPath: Quickshell.iconPath(Icons.noKnowledgeIconGuess(windowData?.class), "image-missing")
+    property var iconPath: Quickshell.iconPath(AppSearch.guessIcon(windowData?.class), "image-missing")
     property bool compactMode: Appearance.font.pixelSize.smaller * 4 > targetWindowHeight || Appearance.font.pixelSize.smaller * 4 > targetWindowWidth
+
+    property bool indicateXWayland: (ConfigOptions.overview.showXwaylandIndicator && windowData?.xwayland) ?? false
     
     x: initX
     y: initY
@@ -75,15 +75,6 @@ Rectangle { // Window
             Behavior on implicitSize {
                 animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
             }
-
-            IconImage {
-                id: xwaylandIndicator
-                visible: (ConfigOptions.overview.showXwaylandIndicator && windowData?.xwayland) ?? false
-                anchors.right: parent.right
-                anchors.bottom: parent.bottom
-                source: Quickshell.iconPath("xorg")
-                implicitSize: windowIcon.implicitSize * xwaylandIndicatorToIconRatio
-            }
         }
 
         StyledText {
@@ -94,8 +85,8 @@ Rectangle { // Window
             Layout.fillHeight: true
             horizontalAlignment: Text.AlignHCenter
             font.pixelSize: Appearance.font.pixelSize.smaller
+            font.italic: indicateXWayland ? true : false
             elide: Text.ElideRight
-            // wrapMode: Text.Wrap
             text: windowData?.title ?? ""
         }
     }
